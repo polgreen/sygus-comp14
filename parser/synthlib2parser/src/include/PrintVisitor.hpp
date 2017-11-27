@@ -50,6 +50,8 @@ namespace SynthLib2Parser {
         ostream& Out;
 
     public:
+        std::size_t cex_counter;
+        std::size_t program_counter;
         PrintVisitor(ostream& Out);
         virtual ~PrintVisitor();
 

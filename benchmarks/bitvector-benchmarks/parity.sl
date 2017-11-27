@@ -3,8 +3,8 @@
 
 (set-logic BV)
 
-(define-fun iff ((a Bool) (b Bool)) Bool
-  (not (xor a b)))
+;(define-fun iff ((a Bool) (b Bool)) Bool
+;  (not (xor a b)))
 
 (define-fun parity ((a Bool) (b Bool) (c Bool) (d Bool)) Bool
   (xor (not (xor a b)) (not (xor c d))))

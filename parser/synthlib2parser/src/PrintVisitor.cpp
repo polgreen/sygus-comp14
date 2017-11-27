@@ -40,7 +40,6 @@ namespace SynthLib2Parser {
 
 	std::string PrintVisitor::ReformatFunctionName(const std::string& name)
 	{
-
 		if(name=="bvand")
 			return  "&";
 		 if(name=="bvor")
@@ -65,6 +64,17 @@ namespace SynthLib2Parser {
 				return " % ";
 		 if(name=="bvlshr")
 				return " >> ";
+		 if(name=="not")
+			 return "!";
+		 if(name=="xor")
+			 return "^";
+		 if(name=="and")
+			 return "&&";
+		 if(name=="or")
+			 return "||";
+		 if(name=="=")
+			 return "==";
+
 		 return name;
 	}
 
@@ -88,6 +98,8 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitProgram(const Program* Prog)
     {
+    	cex_counter=0;
+    	program_counter=0;
         for(auto const& Cmd : Prog->GetCmds()) {
             Cmd->Accept(this);
         }
@@ -105,7 +117,7 @@ namespace SynthLib2Parser {
 
 	    for (auto const& ASPair : Cmd->GetArgs()) {
 		  if (!first)
-			Out << ",";
+			Out << ", ";
 		  else
 			first = false;
 		  ASPair->Accept(this);
@@ -113,7 +125,7 @@ namespace SynthLib2Parser {
 	    Out << " )" << endl << "{" << endl;
 	    IndentLevel++;
 	    Out << GetIndent();
-	    Out << "Return ";
+	    Out << "return ";
 	    Cmd->GetTerm()->Accept(this);
 	    Out << ";";
 	    IndentLevel--;
@@ -143,7 +155,7 @@ namespace SynthLib2Parser {
 
     	for (auto const& Sort : Cmd->GetArgSorts()) {
     	  if (!first)
-    		Out << ",";
+    		Out << ", ";
     	  else
     		first = false;
     	  Sort->Accept(this);
@@ -165,10 +177,22 @@ namespace SynthLib2Parser {
     	Out << "// Function to synthesise" << endl;
     	Cmd->GetSort()->Accept(this);
     	Out << " " << Cmd->GetFunName() << "( ";
+    	bool first=true;
     	for(auto const& ASPair : Cmd->GetArgs()) {
+    		if(!first)
+    			Out<<", ";
     	            ASPair->Accept(this);
+    	            first=false;
     	        }
-    	Out << ");" << endl << endl;
+    	Out << ")" << endl << "{" <<endl;
+
+    	IndentLevel++;
+    	Out <<GetIndent();
+    	Cmd->GetSort()->Accept(this);
+    	Out << " result = 0;" << endl;
+    	Out << GetIndent() << "__CPROVER_program_" << program_counter << ":;"<< endl;
+    	Out << GetIndent() << "return result;" << endl <<"}"<< endl;
+    	IndentLevel--;
 
     	Out << "int main()" << endl;
     	Out << "{" << endl;
@@ -204,18 +228,20 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitSetOptsCmd(const SetOptsCmd* Cmd)
     {
-        Out << GetIndent() << "// (set-opts (";
+      /*  Out << GetIndent() << " (set-opts (";
         IndentLevel++;
         for(auto const& Opt : Cmd->GetOpts()) {
             Out << endl << GetIndent() << "(" << Opt.first << " \"" << Opt.second << "\")";
         }
         Out << endl;
         IndentLevel--;
-        Out << GetIndent() << "))" << endl << endl;
+        Out << GetIndent() << "))" << endl << endl;*/
     }
 
     void PrintVisitor::VisitVarDeclCmd(const VarDeclCmd* Cmd)
     {
+    	Out <<GetIndent() << "__CPROVER_counterexample_" << cex_counter << ":" <<endl;
+    	cex_counter++;
     	Out << GetIndent();
         Cmd->GetSort()->Accept(this);
         Out << " " << Cmd->GetName() <<";" << endl << endl;
@@ -303,7 +329,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitBoolSortExpr(const BoolSortExpr* Sort)
     {
-    	Out << "bool";
+    	Out << "_Bool";
       //  Out << "Bool";
     }
 
@@ -350,11 +376,11 @@ namespace SynthLib2Parser {
     	}
     	else
     	{
-		  Out << TheTerm->GetFunName() << "( ";
+    	  Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << "( ";
 		  bool first = true;
 		  for (auto const& Arg : TheTerm->GetArgs()) {
 			if (!first)
-				Out << ",";
+				Out << ", ";
 			Arg->Accept(this);
 			first = false;
 		  }
