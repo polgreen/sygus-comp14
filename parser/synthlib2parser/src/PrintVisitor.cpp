@@ -78,21 +78,20 @@ namespace SynthLib2Parser {
 		 return name;
 	}
 
-	std::string PrintVisitor::ReformatVariableName(const std::string& name)
-	{
 
+	std::string PrintVisitor::ReformatLiteralString(const std::string& name)
+	{
+		std::string result = name;
 		if(name.find("#x",0)==0)
 		{
-			name.erase(0,2);
-			return name;
-
+			result.erase(0,2);
 		}
 		if(name.find("#b",0)==0)
 		{
-
+			result.erase(0,2);
+			result = std::to_string(std::stoi(result,nullptr,2));
 		}
-			return name;
-
+			return result;
 	}
 
 
@@ -299,9 +298,6 @@ namespace SynthLib2Parser {
     {
     	ASPair->GetSort()->Accept(this);
     	Out << " " << ASPair->GetName() <<" ";
-      /*  Out << "(" << ASPair->GetName() << " ";
-        ASPair->GetSort()->Accept(this);
-        Out << ")";*/
     }
 
     void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort)
@@ -427,17 +423,19 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitLetTerm(const LetTerm* TheTerm)
     {
+    	Out <<"{" << endl;
+    	Out << GetIndent();
 
-        Out << "(let (" << endl;
+     // Out << "(let (" << endl;
         IndentLevel++;
         for(auto const& Binding : TheTerm->GetBindings()) {
             Binding->Accept(this);
         }
-        Out << ")" << endl;
+ //     Out << ")" << endl;
         Out << GetIndent();
         TheTerm->GetBoundInTerm()->Accept(this);
         IndentLevel--;
-        Out << endl << GetIndent() << ")";
+//        Out << endl << GetIndent() << ")";
     }
 
     void PrintVisitor::VisitLetBindingGTerm(const LetBindingGTerm* Binding)
@@ -535,7 +533,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitLiteral(const Literal* TheLiteral)
     {
-        Out << TheLiteral->GetLiteralString();
+        Out << ReformatLiteralString(TheLiteral->GetLiteralString());
     }
 
     // The << operator for AST bases

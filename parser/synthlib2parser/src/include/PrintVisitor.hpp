@@ -57,7 +57,7 @@ namespace SynthLib2Parser {
 
         virtual void VisitProgram(const Program* Prog) override;
         std::string ReformatFunctionName(const std::string& name);
-        std::string ReformatVariableName(const std::string& name);
+        std::string ReformatLiteralString(const std::string& name);
         virtual void VisitFunDefCmd(const FunDefCmd* Cmd) override;
         virtual void VisitFunDeclCmd(const FunDeclCmd* Cmd) override;
         virtual void VisitSynthFunCmd(const SynthFunCmd* Cmd) override;
