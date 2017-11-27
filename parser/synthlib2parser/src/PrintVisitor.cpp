@@ -43,6 +43,7 @@ namespace SynthLib2Parser {
 // =>
 // TODO declare main before first declaration
 
+
 	void PrintVisitor::GetStringToOperatorMap()
 	{
 		String2OperatorMap["bvand"] = "&";
@@ -71,6 +72,12 @@ namespace SynthLib2Parser {
 				 String2OperatorMap["or"] = "||";
 				 String2OperatorMap["="] = "==";
 				 String2OperatorMap["true"] = "1";
+
+				 BasicOperators.insert("+");
+				 BasicOperators.insert("-");
+				 BasicOperators.insert("*");
+				 BasicOperators.insert("/");
+				 BasicOperators.insert("%");
 
 	}
 
@@ -441,7 +448,8 @@ namespace SynthLib2Parser {
     	Out << "(";
 
     	if(TheTerm ->GetArgs().size()==2 &&
-    			String2OperatorMap.find(TheTerm->GetFunName())!=String2OperatorMap.end())
+    			String2OperatorMap.find(TheTerm->GetFunName())!=String2OperatorMap.end() &&
+				BasicOperators.find(TheTerm->GetFunName())!=BasicOperators.end())
     	{
     		TheTerm->GetArgs()[0]->Accept(this);
     		Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << " ";

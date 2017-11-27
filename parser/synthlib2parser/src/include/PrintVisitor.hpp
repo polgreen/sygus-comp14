@@ -51,6 +51,7 @@ namespace SynthLib2Parser {
 
     public:
         std::map<std::string, std::string> String2OperatorMap;
+        std::set<std::string> BasicOperators;
         std::size_t cex_counter;
         std::size_t program_counter;
         bool first_declaration;
