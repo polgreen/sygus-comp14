@@ -288,7 +288,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort)
     {
-        Out << "Int";
+        Out << "int";
     }
 
     void PrintVisitor::VisitBVSortExpr(const BVSortExpr* Sort)
