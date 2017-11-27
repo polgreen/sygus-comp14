@@ -78,7 +78,7 @@ namespace SynthLib2Parser {
 				 BasicOperators.insert("*");
 				 BasicOperators.insert("/");
 				 BasicOperators.insert("%");
-
+				 BasicOperators.insert("==");
 	}
 
 	std::string PrintVisitor::ReformatFunctionName(const std::string& name)
@@ -445,15 +445,15 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitFunTerm(const FunTerm* TheTerm)
     {
-    	Out << "(";
-
     	if(TheTerm ->GetArgs().size()==2 &&
-    			String2OperatorMap.find(TheTerm->GetFunName())!=String2OperatorMap.end() &&
-				BasicOperators.find(TheTerm->GetFunName())!=BasicOperators.end())
+    			(String2OperatorMap.find(TheTerm->GetFunName())!=String2OperatorMap.end() ||
+				BasicOperators.find(TheTerm->GetFunName())!=BasicOperators.end()))
     	{
+    		Out << "(";
     		TheTerm->GetArgs()[0]->Accept(this);
     		Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << " ";
     		TheTerm->GetArgs()[1]->Accept(this);
+    		Out << ")";
     	}
     	else
     	{
@@ -468,7 +468,6 @@ namespace SynthLib2Parser {
 		  Out << ")";
     	}
 
-    	Out <<")";
  /*
         Out << "(" << TheTerm->GetFunName();
         for(auto const& Arg : TheTerm->GetArgs()) {
