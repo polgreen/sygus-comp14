@@ -1,5 +1,5 @@
 BUILD_SUFFIX=debug
-OPTFLAGS=-ggdb3 -O0 -fno-inline
+OPTFLAGS=-g -O0 -fno-inline
 FEAT_FLAGS=-fPIC
 
 ifeq ($(MAKECMDGOALS), opt)

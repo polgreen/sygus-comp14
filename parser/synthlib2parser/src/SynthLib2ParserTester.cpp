@@ -36,12 +36,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <SynthLib2ParserIFace.hpp>
 
-using namespace SynthLib2Parser;
+//using namespace SynthLib2Parser;
+
+
 
 int main(int argc, char* argv[])
 {
-    SynthLib2Parser::SynthLib2Parser* Parser = new SynthLib2Parser::SynthLib2Parser();
-    try {
+    SynthLib2Parser::SynthLib2Parser* Parser =
+        new SynthLib2Parser::SynthLib2Parser();
+    try
+    {
         (*Parser)(argv[1]);
     } catch (const exception& Ex) {
         cout << Ex.what() << endl;
@@ -49,6 +53,7 @@ int main(int argc, char* argv[])
     }
 
     cout << (*Parser->GetProgram()) << endl;
+
 
     delete Parser;
 }

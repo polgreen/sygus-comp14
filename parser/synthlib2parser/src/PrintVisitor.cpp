@@ -63,8 +63,28 @@ namespace SynthLib2Parser {
         Out.flush();
     }
 
+
     void PrintVisitor::VisitFunDefCmd(const FunDefCmd* Cmd)
     {
+    	Out << GetIndent();
+    	Out <<"// define function " << endl;
+    	Cmd->GetSort()->Accept(this);
+    	Out << " " << Cmd->GetFunName() << "( ";
+    	bool first=true;
+
+	    for (auto const& ASPair : Cmd->GetArgs()) {
+		  if (!first)
+			Out << ",";
+		  else
+			first = false;
+		  ASPair->Accept(this);
+	    }
+	    Out << " )" << endl << "{" << endl;
+	    IndentLevel++;
+	    Cmd->GetTerm()->Accept(this);
+	    IndentLevel--;
+	    Out << endl << "}" << endl << endl;
+/*
         Out << GetIndent() << "(define-fun " << Cmd->GetFunName() << " (";
         for(auto const& ASPair : Cmd->GetArgs()) {
             ASPair->Accept(this);
@@ -77,23 +97,46 @@ namespace SynthLib2Parser {
         Cmd->GetTerm()->Accept(this);
         Out << endl;
         IndentLevel--;
-        Out << ")" << endl << endl;
+        Out << ")" << endl << endl;*/
     }
 
     void PrintVisitor::VisitFunDeclCmd(const FunDeclCmd* Cmd)
     {
+    	Out << "// Declare function" << endl;
+    	Cmd->GetSort()->Accept(this);
+    	Out << " " << Cmd->GetFunName() << "( ";
+    	bool first=true;
+
+    	for (auto const& Sort : Cmd->GetArgSorts()) {
+    	  if (!first)
+    		Out << ",";
+    	  else
+    		first = false;
+    	  Sort->Accept(this);
+        }
+    	Out << " );" << endl << endl;
+/*
         Out << GetIndent() << "(declare-fun " << Cmd->GetFunName() << " (";
         for(auto const& Sort : Cmd->GetArgSorts()) {
             Sort->Accept(this);
         }
         Out << ") ";
         Cmd->GetSort()->Accept(this);
-        Out << ")" << endl << endl;
+        Out << ")" << endl << endl;*/
     }
 
     void PrintVisitor::VisitSynthFunCmd(const SynthFunCmd* Cmd)
     {
-        Out << GetIndent() << "(synth-fun " << Cmd->GetFunName() << " (";
+    	Out << GetIndent();
+    	Out << "\\ Function to synthesise" << endl;
+    	Cmd->GetSort()->Accept(this);
+    	Out << " " << Cmd->GetFunName() << "( ";
+    	for(auto const& ASPair : Cmd->GetArgs()) {
+    	            ASPair->Accept(this);
+    	        }
+    	Out << ");" << endl << endl;
+
+    /*    Out << GetIndent() << "(synth-fun " << Cmd->GetFunName() << " (";
         for(auto const& ASPair : Cmd->GetArgs()) {
             ASPair->Accept(this);
         }
@@ -111,19 +154,19 @@ namespace SynthLib2Parser {
         IndentLevel--;
         Out << ")" << endl;
         IndentLevel--;
-        Out << ")" << endl << endl;
+        Out << ")" << endl << endl;*/
     }
 
     void PrintVisitor::VisitSortDefCmd(const SortDefCmd* Cmd)
     {
-        Out << GetIndent() << "(define-sort " << Cmd->GetName() << " ";
+        Out << GetIndent() << "// (define-sort " << Cmd->GetName() << " ";
         Cmd->GetSortExpr()->Accept(this);
         Out << ")" << endl << endl;
     }
 
     void PrintVisitor::VisitSetOptsCmd(const SetOptsCmd* Cmd)
     {
-        Out << GetIndent() << "(set-opts (";
+        Out << GetIndent() << "// (set-opts (";
         IndentLevel++;
         for(auto const& Opt : Cmd->GetOpts()) {
             Out << endl << GetIndent() << "(" << Opt.first << " \"" << Opt.second << "\")";
@@ -135,36 +178,46 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitVarDeclCmd(const VarDeclCmd* Cmd)
     {
-        Out << GetIndent() << "(declare-var " << Cmd->GetName() << " ";
+    	Out << GetIndent();
         Cmd->GetSort()->Accept(this);
-        Out << ")" << endl << endl;
+        Out << Cmd->GetName() <<";" << endl << endl;
+       /* Out << GetIndent() << "(declare-var " << Cmd->GetName() << " ";
+        Cmd->GetSort()->Accept(this);
+        Out << ")" << endl << endl;*/
     }
 
 
     void PrintVisitor::VisitConstraintCmd(const ConstraintCmd* Cmd)
     {
+    	Out << "__CPROVER_assert( ";
+    	Out <<  Cmd->GetTerm()->Accept(this);
+    	Out << ", \"\" );" <<endl << endl;
+
+    	/*
         Out << "(constraint " << endl;
         IndentLevel++;
         Cmd->GetTerm()->Accept(this);
         IndentLevel--;
-        Out << endl << GetIndent() << ")" << endl << endl;
+        Out << endl << GetIndent() << ")" << endl << endl;*/
     }
 
     void PrintVisitor::VisitSetLogicCmd(const SetLogicCmd* Cmd)
     {
-        Out << GetIndent() << "(set-logic " << Cmd->GetLogicName() << ")" << endl << endl;
+        Out << GetIndent() << "// (set-logic " << Cmd->GetLogicName() << ")" << endl << endl;
     }
 
     void PrintVisitor::VisitCheckSynthCmd(const CheckSynthCmd* Cmd)
     {
-        Out << GetIndent() << "(check-synth)" << endl << endl;
+        Out << GetIndent() << "// (check-synth)" << endl << endl;
     }
 
     void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair)
     {
-        Out << "(" << ASPair->GetName() << " ";
+    	ASPair->GetSort()->Accept(this);
+    	Out << " " << ASPair->GetName() <<" ";
+      /*  Out << "(" << ASPair->GetName() << " ";
         ASPair->GetSort()->Accept(this);
-        Out << ")";
+        Out << ")";*/
     }
 
     void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort)
@@ -174,7 +227,8 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitBVSortExpr(const BVSortExpr* Sort)
     {
-        Out << "(BitVec " << Sort->GetSize() << ")";
+    	Out << "__CPROVER_bitvector[" << Sort->GetSize() << "]";
+     //   Out << "(BitVec " << Sort->GetSize() << ")";
     }
 
     void PrintVisitor::VisitNamedSortExpr(const NamedSortExpr* Sort)
@@ -184,16 +238,22 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitArraySortExpr(const ArraySortExpr* Sort)
     {
-        Out << "(Array ";
+    	Sort->GetDomainSort()->Accept(this);
+    	Out << "[";
+    	Sort->GetRangeSort()->Accept(this);
+    	Out << "]" << endl;
+
+   /*     Out << "(Array ";
         Sort->GetDomainSort()->Accept(this);
         Out << " ";
         Sort->GetRangeSort()->Accept(this);
-        Out << ")";
+        Out << ")"; */
     }
 
     void PrintVisitor::VisitRealSortExpr(const RealSortExpr* Sort)
     {
-        Out << "Real";
+    	Out << "double";
+       // Out << "Real";
     }
 
     void PrintVisitor::VisitFunSortExpr(const FunSortExpr* Sort)
@@ -203,7 +263,8 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitBoolSortExpr(const BoolSortExpr* Sort)
     {
-        Out << "Bool";
+    	Out << "bool";
+      //  Out << "Bool";
     }
 
     void PrintVisitor::VisitEnumSortExpr(const EnumSortExpr* Sort)

@@ -605,7 +605,8 @@ namespace SynthLib2Parser {
 
     u32 BVSortExpr::Hash() const
     {
-        u64 Retval = 0;
+      //  u64 Retval = 0;
+        std::size_t Retval=0;
         boost::hash_combine(Retval, (u64)GetKind());
         boost::hash_combine(Retval, Size);
         return (u32)Retval;
@@ -723,7 +724,8 @@ namespace SynthLib2Parser {
 
     u32 ArraySortExpr::Hash() const
     {
-        u64 Retval = 0;
+       // u64 Retval = 0;
+        std::size_t Retval=0;
         boost::hash_combine(Retval, (u64)GetKind());
         boost::hash_combine(Retval, DomainSort->Hash());
         boost::hash_combine(Retval, RangeSort->Hash());
@@ -840,7 +842,8 @@ namespace SynthLib2Parser {
 
     u32 FunSortExpr::Hash() const
     {
-        u64 Retval = 0;
+        //u64 Retval = 0;
+        std::size_t Retval=0;
         boost::hash_combine(Retval, (u64)GetKind());
         for(auto const& ArgSort : ArgSorts) {
             boost::hash_combine(Retval, ArgSort->Hash());
@@ -969,7 +972,8 @@ namespace SynthLib2Parser {
 
     u32 EnumSortExpr::Hash() const
     {
-        u64 Retval = 0;
+        //u64 Retval = 0;
+        std::size_t Retval=0;
         boost::hash_combine(Retval, (u64)GetKind());
         for(auto const& Constructor : EnumSortConstructorVec) {
             boost::hash_combine(Retval, Constructor);

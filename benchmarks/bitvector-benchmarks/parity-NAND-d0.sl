@@ -1,3 +1,4 @@
+; POLGREEN: not meaningful without grammar, is specifically asking to synth onlt with AND and NOT gates
 ; Synthesize a part of a parity-checking circuit using only NAND gates
 
 (set-logic BV)

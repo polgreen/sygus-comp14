@@ -69,9 +69,10 @@ namespace SynthLib2Parser {
     class ASTBase
     {
     protected:
-        SourceLocation Location;
+
 
     public:
+        SourceLocation Location;
         ASTBase(const SourceLocation& Location);
         virtual ~ASTBase();
 
@@ -797,9 +798,10 @@ namespace SynthLib2Parser {
     class Program : public ASTBase
     {
     private:
-        vector<ASTCmd*> Cmds;
+
 
     public:
+        vector<ASTCmd*> Cmds;
         Program(const vector<ASTCmd*>& Cmds);
         virtual ~Program();
 
