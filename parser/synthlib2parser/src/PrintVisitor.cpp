@@ -78,6 +78,24 @@ namespace SynthLib2Parser {
 		 return name;
 	}
 
+	std::string PrintVisitor::ReformatVariableName(const std::string& name)
+	{
+
+		if(name.find("#x",0)==0)
+		{
+			name.erase(0,2);
+			return name;
+
+		}
+		if(name.find("#b",0)==0)
+		{
+
+		}
+			return name;
+
+	}
+
+
 
     PrintVisitor::PrintVisitor(ostream& Out)
         : ASTVisitorBase("PrintVisitor"), IndentLevel(0), Out(Out)
