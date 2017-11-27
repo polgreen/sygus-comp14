@@ -38,6 +38,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace SynthLib2Parser {
 
+	std::string PrintVisitor::ReformatFunctionName(const std::string& name)
+	{
+
+		if(name=="bvand")
+			return  "&";
+		 if(name=="bvor")
+			return  "|";
+		 if(name=="bvxor")
+			return  "^";
+		 if(name=="bvnot")
+			return  "~";
+		 if(name=="bvlshl" || name=="bvlahl")
+			return " << ";
+		 if(name=="bvlshr" || name=="bvashr")
+			return " >> ";
+		 if(name=="bvadd")
+				return  "+";
+		 if(name=="bvsub")
+				return  "-";
+		 if(name=="bvmul")
+				return  "*";
+		 if(name=="bvudiv" || name=="bvsdiv")
+				return  "/";
+		 if(name=="bvurem" || name=="bvsrem")
+				return " % ";
+		 if(name=="bvlshr")
+				return " >> ";
+		 return name;
+	}
+
+
     PrintVisitor::PrintVisitor(ostream& Out)
         : ASTVisitorBase("PrintVisitor"), IndentLevel(0), Out(Out)
     {
@@ -314,7 +345,7 @@ namespace SynthLib2Parser {
     	if(TheTerm ->GetArgs().size()==2)
     	{
     		TheTerm->GetArgs()[0]->Accept(this);
-    		Out << " "<< TheTerm->GetFunName() << " ";
+    		Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << " ";
     		TheTerm->GetArgs()[1]->Accept(this);
     	}
     	else

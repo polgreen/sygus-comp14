@@ -54,6 +54,7 @@ namespace SynthLib2Parser {
         virtual ~PrintVisitor();
 
         virtual void VisitProgram(const Program* Prog) override;
+        std::string ReformatFunctionName(const std::string& name);
 
         virtual void VisitFunDefCmd(const FunDefCmd* Cmd) override;
         virtual void VisitFunDeclCmd(const FunDeclCmd* Cmd) override;
