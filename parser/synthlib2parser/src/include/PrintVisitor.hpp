@@ -50,14 +50,20 @@ namespace SynthLib2Parser {
         ostream& Out;
 
     public:
+        std::map<std::string, std::string> String2OperatorMap;
         std::size_t cex_counter;
         std::size_t program_counter;
+        bool first_declaration;
         PrintVisitor(ostream& Out);
         virtual ~PrintVisitor();
+
+        void GetStringToOperatorMap();
 
         virtual void VisitProgram(const Program* Prog) override;
         std::string ReformatFunctionName(const std::string& name);
         std::string ReformatLiteralString(const std::string& name);
+        std::string ReformatSymbol(const std::string& name);
+
         virtual void VisitFunDefCmd(const FunDefCmd* Cmd) override;
         virtual void VisitFunDeclCmd(const FunDeclCmd* Cmd) override;
         virtual void VisitSynthFunCmd(const SynthFunCmd* Cmd) override;

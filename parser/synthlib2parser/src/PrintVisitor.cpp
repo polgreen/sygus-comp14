@@ -37,18 +37,54 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <PrintVisitor.hpp>
 
 namespace SynthLib2Parser {
+// TODO: make this a map.
+// bv2nat, bvule, bvugt
+// Do something about 2 argument functions that are not in this list
+// =>
+// TODO declare main before first declaration
+
+	void PrintVisitor::GetStringToOperatorMap()
+	{
+		String2OperatorMap["bvand"] = "&";
+
+				 String2OperatorMap["bvor"] =  "|";
+				 String2OperatorMap["bvxor"] =  "^";
+				 String2OperatorMap["bvnot"] =  "~";
+				 String2OperatorMap["bvneg"] =  "~";
+				 String2OperatorMap["bvlshl"] = "<<";
+				 String2OperatorMap["bvlahl"] = "<<";
+				 String2OperatorMap["bvshl"] = "<<";
+				 String2OperatorMap["bvlshr"] = ">>";
+				 String2OperatorMap["bvlahr"] = ">>";
+				 String2OperatorMap["bvshr"] = ">>";
+				 String2OperatorMap["bvadd"] =  "+";
+				 String2OperatorMap["bvsub"] =  "-";
+				 String2OperatorMap["bvmul"] =  "*";
+				 String2OperatorMap["bvudiv"] = "/";
+				 String2OperatorMap["bvsdiv"] =  "/";
+				 String2OperatorMap["bvurem"]= "%";
+				 String2OperatorMap["bvsrem"] = " % ";
+				 String2OperatorMap["bvlshr"] = " >> ";
+				 String2OperatorMap["not"] =  "!";
+				 String2OperatorMap["xor"] = "^";
+				 String2OperatorMap["and"] = "&&";
+				 String2OperatorMap["or"] = "||";
+				 String2OperatorMap["="] = "==";
+				 String2OperatorMap["true"] = "1";
+
+	}
 
 	std::string PrintVisitor::ReformatFunctionName(const std::string& name)
 	{
-		if(name=="bvand")
+		/*if(name=="bvand")
 			return  "&";
 		 if(name=="bvor")
 			return  "|";
 		 if(name=="bvxor")
 			return  "^";
-		 if(name=="bvnot")
+		 if(name=="bvnot" || name =="bvneg")
 			return  "~";
-		 if(name=="bvlshl" || name=="bvlahl")
+		 if(name=="bvlshl" || name=="bvlahl" ||  name=="bvshl")
 			return " << ";
 		 if(name=="bvlshr" || name=="bvashr")
 			return " >> ";
@@ -74,6 +110,10 @@ namespace SynthLib2Parser {
 			 return "||";
 		 if(name=="=")
 			 return "==";
+		 if(name=="true")
+			 return "1";*/
+		 if(String2OperatorMap.find(name)!=String2OperatorMap.end())
+			 return String2OperatorMap[name];
 
 		 return name;
 	}
@@ -85,13 +125,26 @@ namespace SynthLib2Parser {
 		if(name.find("#x",0)==0)
 		{
 			result.erase(0,2);
+			result = std::to_string(std::stoi(result,nullptr,16));
 		}
 		if(name.find("#b",0)==0)
 		{
 			result.erase(0,2);
 			result = std::to_string(std::stoi(result,nullptr,2));
 		}
+		if(name=="true")
+			result = "1";
+		if(name=="false")
+			result = "0";
+
 			return result;
+	}
+
+	std::string PrintVisitor::ReformatSymbol(const std::string& name)
+	{
+	//	if(name=="true")
+		//	return "1";
+		return name;
 	}
 
 
@@ -117,6 +170,8 @@ namespace SynthLib2Parser {
     {
     	cex_counter=0;
     	program_counter=0;
+    	first_declaration=true;
+    	GetStringToOperatorMap();
         for(auto const& Cmd : Prog->GetCmds()) {
             Cmd->Accept(this);
         }
@@ -211,9 +266,9 @@ namespace SynthLib2Parser {
     	Out << GetIndent() << "return result;" << endl <<"}"<< endl;
     	IndentLevel--;
 
-    	Out << "int main()" << endl;
-    	Out << "{" << endl;
-    	IndentLevel++;
+    //	Out << "int main()" << endl;
+    //	Out << "{" << endl;
+    //	IndentLevel++;
 
     /*    Out << GetIndent() << "(synth-fun " << Cmd->GetFunName() << " (";
         for(auto const& ASPair : Cmd->GetArgs()) {
@@ -257,11 +312,14 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitVarDeclCmd(const VarDeclCmd* Cmd)
     {
+    	if(cex_counter==0)
+    		Out<<"int main()"<<endl<<"{"<<endl;
+    	IndentLevel++;
     	Out <<GetIndent() << "__CPROVER_counterexample_" << cex_counter << ":" <<endl;
     	cex_counter++;
     	Out << GetIndent();
         Cmd->GetSort()->Accept(this);
-        Out << " " << Cmd->GetName() <<";" << endl << endl;
+        Out << " " << ReformatSymbol(Cmd->GetName()) <<";" << endl << endl;
        /* Out << GetIndent() << "(declare-var " << Cmd->GetName() << " ";
         Cmd->GetSort()->Accept(this);
         Out << ")" << endl << endl;*/
@@ -297,7 +355,7 @@ namespace SynthLib2Parser {
     void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair)
     {
     	ASPair->GetSort()->Accept(this);
-    	Out << " " << ASPair->GetName() <<" ";
+    	Out << " " << ReformatSymbol(ASPair->GetName()) <<" ";
     }
 
     void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort)
@@ -313,7 +371,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitNamedSortExpr(const NamedSortExpr* Sort)
     {
-        Out << Sort->GetName();
+        Out << ReformatSymbol(Sort->GetName());
     }
 
     void PrintVisitor::VisitArraySortExpr(const ArraySortExpr* Sort)
@@ -382,7 +440,8 @@ namespace SynthLib2Parser {
     {
     	Out << "(";
 
-    	if(TheTerm ->GetArgs().size()==2)
+    	if(TheTerm ->GetArgs().size()==2 &&
+    			String2OperatorMap.find(TheTerm->GetFunName())!=String2OperatorMap.end())
     	{
     		TheTerm->GetArgs()[0]->Accept(this);
     		Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << " ";
@@ -418,7 +477,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitSymbolTerm(const SymbolTerm* TheTerm)
     {
-        Out << TheTerm->GetSymbol();
+        Out << ReformatSymbol(TheTerm->GetSymbol());
     }
 
     void PrintVisitor::VisitLetTerm(const LetTerm* TheTerm)
@@ -443,7 +502,7 @@ namespace SynthLib2Parser {
     	Out <<" //";
     	Binding->GetVarSort()->Accept(this);
     	Out << endl;
-    	Out << Binding->GetVarName() << " = ";
+    	Out << ReformatSymbol(Binding->GetVarName()) << " = ";
     	Binding->GetBoundToTerm()->Accept(this);
     	Out << ";" << endl << endl;
     	/*
@@ -457,7 +516,7 @@ namespace SynthLib2Parser {
     void PrintVisitor::VisitFunGTerm(const FunGTerm* TheTerm)
     {
     	Out << " // Function G Term" << endl;
-        Out << "(" << TheTerm->GetName();
+        Out << "(" << ReformatSymbol(TheTerm->GetName());
         for(auto const& Arg : TheTerm->GetArgs()) {
             Out << " ";
             Arg->Accept(this);
@@ -472,7 +531,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitSymbolGTerm(const SymbolGTerm* TheTerm)
     {
-        Out << TheTerm->GetSymbol();
+        Out << ReformatSymbol(TheTerm->GetSymbol());
     }
 
     void PrintVisitor::VisitLetGTerm(const LetGTerm* TheTerm)
