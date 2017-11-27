@@ -82,7 +82,9 @@ namespace SynthLib2Parser {
 	    Out << " )" << endl << "{" << endl;
 	    IndentLevel++;
 	    Out << GetIndent();
+	    Out << "Return ";
 	    Cmd->GetTerm()->Accept(this);
+	    Out << ";";
 	    IndentLevel--;
 	    Out << endl << "}" << endl << endl;
 /*
@@ -137,6 +139,10 @@ namespace SynthLib2Parser {
     	        }
     	Out << ");" << endl << endl;
 
+    	Out << "int main()" << endl;
+    	Out << "{" << endl;
+    	IndentLevel++;
+
     /*    Out << GetIndent() << "(synth-fun " << Cmd->GetFunName() << " (";
         for(auto const& ASPair : Cmd->GetArgs()) {
             ASPair->Accept(this);
@@ -190,6 +196,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitConstraintCmd(const ConstraintCmd* Cmd)
     {
+    	Out << GetIndent();
     	Out << "__CPROVER_assert( ";
     	Cmd->GetTerm()->Accept(this);
     	Out << ", \"\" );" <<endl << endl;
@@ -209,7 +216,8 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitCheckSynthCmd(const CheckSynthCmd* Cmd)
     {
-        Out << GetIndent() << "// (check-synth)" << endl << endl;
+       // Out << GetIndent() << "(check-synth)" << endl << endl;
+        Out << " return 0;" << endl << "}"<<endl;
     }
 
     void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair)
@@ -301,12 +309,35 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitFunTerm(const FunTerm* TheTerm)
     {
+    	Out << "(";
+
+    	if(TheTerm ->GetArgs().size()==2)
+    	{
+    		TheTerm->GetArgs()[0]->Accept(this);
+    		Out << " "<< TheTerm->GetFunName() << " ";
+    		TheTerm->GetArgs()[1]->Accept(this);
+    	}
+    	else
+    	{
+		  Out << TheTerm->GetFunName() << "( ";
+		  bool first = true;
+		  for (auto const& Arg : TheTerm->GetArgs()) {
+			if (!first)
+				Out << ",";
+			Arg->Accept(this);
+			first = false;
+		  }
+		  Out << ")";
+    	}
+
+    	Out <<")";
+ /*
         Out << "(" << TheTerm->GetFunName();
         for(auto const& Arg : TheTerm->GetArgs()) {
             Out << " ";
             Arg->Accept(this);
         }
-        Out << ")";
+        Out << ")";*/
     }
 
     void PrintVisitor::VisitLiteralTerm(const LiteralTerm* TheTerm)
