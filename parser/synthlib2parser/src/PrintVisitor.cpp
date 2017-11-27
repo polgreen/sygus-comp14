@@ -81,6 +81,7 @@ namespace SynthLib2Parser {
 	    }
 	    Out << " )" << endl << "{" << endl;
 	    IndentLevel++;
+	    Out << GetIndent();
 	    Cmd->GetTerm()->Accept(this);
 	    IndentLevel--;
 	    Out << endl << "}" << endl << endl;
@@ -128,7 +129,7 @@ namespace SynthLib2Parser {
     void PrintVisitor::VisitSynthFunCmd(const SynthFunCmd* Cmd)
     {
     	Out << GetIndent();
-    	Out << "\\ Function to synthesise" << endl;
+    	Out << "// Function to synthesise" << endl;
     	Cmd->GetSort()->Accept(this);
     	Out << " " << Cmd->GetFunName() << "( ";
     	for(auto const& ASPair : Cmd->GetArgs()) {
@@ -180,7 +181,7 @@ namespace SynthLib2Parser {
     {
     	Out << GetIndent();
         Cmd->GetSort()->Accept(this);
-        Out << Cmd->GetName() <<";" << endl << endl;
+        Out << " " << Cmd->GetName() <<";" << endl << endl;
        /* Out << GetIndent() << "(declare-var " << Cmd->GetName() << " ";
         Cmd->GetSort()->Accept(this);
         Out << ")" << endl << endl;*/
@@ -190,7 +191,7 @@ namespace SynthLib2Parser {
     void PrintVisitor::VisitConstraintCmd(const ConstraintCmd* Cmd)
     {
     	Out << "__CPROVER_assert( ";
-    	Out <<  Cmd->GetTerm()->Accept(this);
+    	Cmd->GetTerm()->Accept(this);
     	Out << ", \"\" );" <<endl << endl;
 
     	/*
@@ -269,20 +270,33 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitEnumSortExpr(const EnumSortExpr* Sort)
     {
-        Out << "(Enum (";
+    	Out << "enum {";
+    	for(auto const& Con : Sort->GetConstructors()) {
+    	            Out << Con << ",";
+    	        }
+    	Out <<"}";
+
+  /*      Out << "(Enum (";
         for(auto const& Con : Sort->GetConstructors()) {
             Out << Con << " ";
         }
-        Out << "))";
+        Out << "))";*/
     }
 
     void PrintVisitor::VisitLetBindingTerm(const LetBindingTerm* Binding)
     {
+    	Out <<" //";
+    	Binding->GetVarSort()->Accept(this);
+    	Out << endl;
+    	Out << Binding->GetVarName() << " = ";
+    	Binding->GetBoundToTerm()->Accept(this);
+    	Out << ";" << endl << endl;
+/*
         Out << "(" << Binding->GetVarName() << " ";
         Binding->GetVarSort()->Accept(this);
         Out << " ";
         Binding->GetBoundToTerm()->Accept(this);
-        Out << ")";
+        Out << ")";*/
     }
 
     void PrintVisitor::VisitFunTerm(const FunTerm* TheTerm)
@@ -307,6 +321,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitLetTerm(const LetTerm* TheTerm)
     {
+
         Out << "(let (" << endl;
         IndentLevel++;
         for(auto const& Binding : TheTerm->GetBindings()) {
@@ -321,15 +336,23 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitLetBindingGTerm(const LetBindingGTerm* Binding)
     {
+    	Out <<" //";
+    	Binding->GetVarSort()->Accept(this);
+    	Out << endl;
+    	Out << Binding->GetVarName() << " = ";
+    	Binding->GetBoundToTerm()->Accept(this);
+    	Out << ";" << endl << endl;
+    	/*
         Out << "(" << Binding->GetVarName() << " ";
         Binding->GetVarSort()->Accept(this);
         Out << " ";
         Binding->GetBoundToTerm()->Accept(this);
-        Out << ")";
+        Out << ")";*/
     }
 
     void PrintVisitor::VisitFunGTerm(const FunGTerm* TheTerm)
     {
+    	Out << " // Function G Term" << endl;
         Out << "(" << TheTerm->GetName();
         for(auto const& Arg : TheTerm->GetArgs()) {
             Out << " ";
@@ -350,6 +373,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitLetGTerm(const LetGTerm* TheTerm)
     {
+    	Out << "VisitLetGTerm \n";
         Out << "(let (" << endl;
         IndentLevel++;
         for(auto const& Binding : TheTerm->GetBindings()) {
@@ -389,6 +413,7 @@ namespace SynthLib2Parser {
 
     void PrintVisitor::VisitNTDef(const NTDef* Def)
     {
+    	Out << " VisitNTDEF \n";
         Out << "(" << Def->GetName() << " ";
         Def->GetSort()->Accept(this);
         Out << " (" << endl;
